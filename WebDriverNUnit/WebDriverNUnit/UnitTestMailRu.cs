@@ -1,5 +1,8 @@
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using WebDriverNUnit.Entities;
 using WebDriverNUnit.Pages;
 using WebDriverNUnit.WebDriver;
 
@@ -8,27 +11,55 @@ namespace WebDriverNUnit
 	public class TestsForMailRu : BaseTest
 	{
 		[Test]
-		[TestCase("lizakhramova", "070461040485")]
-		public void TestLogin(string login, string password)
+		[TestCaseSource(nameof(GetTestLoginData))]
+		public void TestLogin(User user)
 		{
 			var homePage = new HomePage();
-			homePage.GoToYourAccountPage(login, password);
+			homePage.GoToYourAccountPage(user);
+		}
+
+		private static List<User> GetTestLoginData
+		{
+			get
+			{
+				var users = new List<User>();
+
+				using (var fs = File.OpenRead(@".\Resources\TestLoginData.csv"))
+				using (var sr = new StreamReader(fs))
+				{
+					string line = string.Empty;
+					while (line != null)
+					{
+						line = sr.ReadLine();
+						if (line != null)
+						{
+							string[] split = line.Split(new char[] { ',' },
+								StringSplitOptions.None);
+
+							var user = new User() { Login = split[0], Password = split[1]};
+							users.Add(user);
+						}
+					}
+				}
+
+				return users;
+			}
 		}
 
 		[Test]
-		[TestCase("lizakhramova", "070461040485")]
-		public void TestLoginWithActions(string login, string password)
+		[TestCaseSource(nameof(GetTestLoginData))]
+		public void TestLoginWithActions(User user)
 		{
 			var homePage = new HomePage();
-			homePage.GoToYourAccountPageWithActions(login, password);
+			homePage.GoToYourAccountPageWithActions(user);
 		}
 
 		[Test]
-		[TestCase("lizakhramova", "070461040485")]
-		public void DeleteFirstDraftEmailWithActions(string login, string password)
+		[TestCaseSource(nameof(GetTestLoginData))]
+		public void DeleteFirstDraftEmailWithActions(User user)
 		{
 			var homePage = new HomePage();
-			var accountPage = homePage.GoToYourAccountPageWithActions(login, password);
+			var accountPage = homePage.GoToYourAccountPageWithActions(user);
 
 			var deleteFirstDraftEmailResult = accountPage.DelteFirstDraftEmail();
 			Assert.IsTrue(deleteFirstDraftEmailResult);
@@ -40,11 +71,14 @@ namespace WebDriverNUnit
 		public void SaveDraftEmail(string login, string password, string letterEmail, string letterSubject, string letterBody)
 		{
 			var homePage = new HomePage();
-			var accountPage = homePage.GoToYourAccountPage(login, password);
+			var user = new User() { Login = login, Password = password };
+
+			var accountPage = homePage.GoToYourAccountPage(user);
 
 			letterSubject = letterSubject + DateTime.Now.TimeOfDay.Ticks.ToString();
 
-			var letterInDraft = accountPage.SaveDraftEmail(letterEmail, letterSubject, letterBody);
+			var letter = new Letter() { Email = letterEmail, Subject = letterSubject, Body = letterBody };
+			var letterInDraft = accountPage.SaveDraftEmail(letter);
 			Assert.NotNull(letterInDraft);
 		}
 
@@ -53,12 +87,15 @@ namespace WebDriverNUnit
 		public void SendDraftEmail(string login, string password, string letterEmail, string letterSubject, string letterBody)
 		{
 			var homePage = new HomePage();
-			var accountPage = homePage.GoToYourAccountPage(login, password);
+			var user = new User() { Login = login, Password = password };
+
+			var accountPage = homePage.GoToYourAccountPage(user);
 
 			letterSubject = letterSubject + DateTime.Now.TimeOfDay.Ticks.ToString();
 
-			accountPage.SaveDraftEmail(letterEmail, letterSubject, letterBody);
-			var sendDraftEmailResult = accountPage.SendDraftEmail(letterEmail, letterSubject, letterBody);
+			var letter = new Letter() { Email = letterEmail, Subject = letterSubject, Body = letterBody };
+			accountPage.SaveDraftEmail(letter);
+			var sendDraftEmailResult = accountPage.SendDraftEmail(letter);
 
 			accountPage.Logout();
 

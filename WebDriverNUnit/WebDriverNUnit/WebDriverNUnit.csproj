@@ -20,6 +20,16 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resources\TestLoginData.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 <Target Name="CopyCustomContent" AfterTargets="AfterBuild">
   <Copy SourceFiles="app.config" DestinationFiles="$(OutDir)\testhost.dll.config" />
 </Target>

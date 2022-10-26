@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WebDriverNUnit.Entities;
 using WebDriverNUnit.WebDriver;
 
 namespace WebDriverNUnit.Pages
@@ -26,14 +27,14 @@ namespace WebDriverNUnit.Pages
 
 		private readonly BaseElement dataClickCounterBE = new BaseElement(By.XPath("//a[@data-show-pixel]//div[@data-click-counter]"));
 
-		public YourAccountPage GoToYourAccountPage(string login, string password)
+		public YourAccountPage GoToYourAccountPage(User user)
 		{
-			return Login(login, password);
+			return Login(user);
 		}
 
-		public YourAccountPage GoToYourAccountPageWithActions(string login, string password)
+		public YourAccountPage GoToYourAccountPageWithActions(User user)
 		{
-			return LoginWithActions(login, password);
+			return LoginWithActions(user);
 		}
 
 		public void AssertIsVisible(By locator)
@@ -42,15 +43,15 @@ namespace WebDriverNUnit.Pages
 			label.WaitForIsVisible();
 		}
 
-		private YourAccountPage Login(string login, string password)
+		private YourAccountPage Login(User user)
 		{
 			loginBE.Click();
 			Browser.GetDriver().SwitchTo().Frame(this.loginFrameBE.GetElement());
 
-			userNameBE.SendKeys(login);
+			userNameBE.SendKeys(user.Login);
 			inputLoginSubmitBE.Click();
 
-			inputPasswordBE.SendKeys(password);
+			inputPasswordBE.SendKeys(user.Password);
 			inputLoginSubmitBE.Click();
 
 			dataClickCounterBE.Click();
@@ -60,7 +61,7 @@ namespace WebDriverNUnit.Pages
 			return new YourAccountPage();
 		}
 
-		private YourAccountPage LoginWithActions(string login, string password)
+		private YourAccountPage LoginWithActions(User user)
 		{
 			//login with actions (use click and keydown)
 
@@ -70,11 +71,11 @@ namespace WebDriverNUnit.Pages
 			Browser.GetDriver().SwitchTo().Frame(this.loginFrameBE.GetElement());
 
 			//input login
-			userNameBE.SendKeysWithActions(login);
+			userNameBE.SendKeysWithActions(user.Login);
 			inputLoginSubmitBE.PressEnter();
 
 			//input password
-			inputPasswordBE.SendKeysWithActions(password);
+			inputPasswordBE.SendKeysWithActions(user.Password);
 			inputLoginSubmitBE.PressEnter();
 
 			dataClickCounterBE.ClickWithActions();
