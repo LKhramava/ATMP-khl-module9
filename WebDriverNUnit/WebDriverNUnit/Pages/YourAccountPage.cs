@@ -107,7 +107,12 @@ namespace WebDriverNUnit.Pages
 			trashItemsBE.WaitForIsVisible();
 
 			//find letter in trash folder
-			var letter = new Letter() { Email = email, Subject = subject, Body = data };
+			var letter = new Letter()
+			{
+				Email = email,
+				Subject = subject,
+				Body = data
+			};
 			var letterInDraft = FindLetterInList(lettersBy, letter);
 			return letterInDraft != null;
 		}

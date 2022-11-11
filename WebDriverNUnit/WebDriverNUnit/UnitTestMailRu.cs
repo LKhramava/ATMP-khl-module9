@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using WebDriverNUnit.Entities;
 using WebDriverNUnit.Pages;
+using WebDriverNUnit.Utility;
 using WebDriverNUnit.WebDriver;
+using static WebDriverNUnit.Utility.TestDataHelper;
 
 namespace WebDriverNUnit
 {
@@ -78,6 +80,21 @@ namespace WebDriverNUnit
 			letterSubject = letterSubject + DateTime.Now.TimeOfDay.Ticks.ToString();
 
 			var letter = new Letter() { Email = letterEmail, Subject = letterSubject, Body = letterBody };
+			var letterInDraft = accountPage.SaveDraftEmail(letter);
+			Assert.NotNull(letterInDraft);
+		}
+
+		[Test]
+		public void SaveDraftEmailWithXmlTestData()
+		{
+			var testData = TestDataHelper.ReadTestData(TestDataType.Xml);
+
+			var homePage = new HomePage();
+			var user = testData.User;
+
+			var accountPage = homePage.GoToYourAccountPage(user);
+			var letter = testData.Letter;
+
 			var letterInDraft = accountPage.SaveDraftEmail(letter);
 			Assert.NotNull(letterInDraft);
 		}
