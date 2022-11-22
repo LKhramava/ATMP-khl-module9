@@ -11,12 +11,6 @@ namespace WebDriverNUnit.Utility
 {
 	public static class TestDataHelper
 	{
-		public enum TestDataType
-		{
-			Xml,
-			Txt
-		}
-
 		public static TestData ReadTestData(TestDataType type)
 		{
 			Director director = new Director();

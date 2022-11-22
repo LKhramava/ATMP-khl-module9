@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using WebDriverNUnit.Entities;
+using WebDriverNUnit.WebDriver;
 
 namespace WebDriverNUnit.Utility
 {
@@ -21,7 +22,7 @@ namespace WebDriverNUnit.Utility
         public void BuildUser()
         {
             XmlSerializer reader = new XmlSerializer(typeof(User));
-            StreamReader file = new StreamReader(@".\Resources\UserData.xml");
+            StreamReader file = new StreamReader(Configuration.UserData);
             _testData.User = (User)reader.Deserialize(file);
             file.Close();
         }
@@ -29,7 +30,7 @@ namespace WebDriverNUnit.Utility
         public void BuildLetter()
         {
             XmlSerializer reader = new XmlSerializer(typeof(Letter));
-            StreamReader file = new StreamReader(@".\Resources\LetterData.xml");
+            StreamReader file = new StreamReader(Configuration.LetterData);
             _testData.Letter = (Letter)reader.Deserialize(file);
             _testData.Letter.Subject += DateTime.Now.TimeOfDay.Ticks.ToString();
             file.Close();

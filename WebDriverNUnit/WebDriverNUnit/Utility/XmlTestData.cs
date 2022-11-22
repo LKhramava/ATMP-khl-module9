@@ -9,31 +9,31 @@ namespace WebDriverNUnit.Utility
 {
 	public class XmlTestData : TestData
 	{
-        private User _user = null;
-        private Letter _letter = null;
+		private User _user;
+		private Letter _letter;
 
-        public User User
+		public User User
 		{
-            get
-            {
-                return _user;
-            }
-            set
+			get
 			{
-                _user = value;
+				return _user;
+			}
+			set
+			{
+				_user = value;
 			}
 		}
 
-        public Letter Letter
-        {
-            get
-            {
-                return _letter;
-            }
-            set
-            {
-                _letter = value;
-            }
-        }
-    }
+		public Letter Letter
+		{
+			get
+			{
+				return _letter;
+			}
+			set
+			{
+				_letter = value;
+			}
+		}
+	}
 }

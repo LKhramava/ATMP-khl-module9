@@ -90,12 +90,10 @@ namespace WebDriverNUnit
 			var testData = TestDataHelper.ReadTestData(TestDataType.Xml);
 
 			var homePage = new HomePage();
-			var user = testData.User;
 
-			var accountPage = homePage.GoToYourAccountPage(user);
-			var letter = testData.Letter;
+			var accountPage = homePage.GoToYourAccountPage(testData.User);
 
-			var letterInDraft = accountPage.SaveDraftEmail(letter);
+			var letterInDraft = accountPage.SaveDraftEmail(testData.Letter);
 			Assert.NotNull(letterInDraft);
 		}
 
