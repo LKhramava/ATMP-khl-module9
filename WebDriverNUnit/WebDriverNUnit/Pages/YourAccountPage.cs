@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using System;
 using System.Threading;
+using WebDriverNUnit.Entities;
 using WebDriverNUnit.WebDriver;
 
 namespace WebDriverNUnit.Pages
@@ -54,9 +55,9 @@ namespace WebDriverNUnit.Pages
 		private readonly BaseElement firstDraftItemBE = new BaseElement(By.XPath("(" + jsLetterListItemDraftString + ")[1]"));
 		private readonly BaseElement firstDraftItemBackgroundBE = new BaseElement(By.XPath("(" + jsLetterListItemDraftString + ")[1]//div[contains(@class, 'llc__background')]"));
 
-		public bool SaveDraftEmail(string letterEmail, string letterSubject, string letterBody)
+		public bool SaveDraftEmail(Letter letter)
 		{
-			SaveDraftEmailInternal(letterEmail, letterSubject, letterBody);
+			SaveDraftEmailInternal(letter);
 
 			//	Verify, that the mail presents in ‘Drafts’ folder
 			//	Verify the draft content (addressee, subject and body – should be the same as in 3).
@@ -66,16 +67,16 @@ namespace WebDriverNUnit.Pages
 			draftBE.UrlContainsFraction("drafts");
 			draftsItemsBE.WaitForIsVisible();
 
-			BaseElement draftSubjectBE = new BaseElement(By.XPath("//span[contains(@class, 'll-sj__normal') and text()='" + letterSubject + "']"));
+			BaseElement draftSubjectBE = new BaseElement(By.XPath("//span[contains(@class, 'll-sj__normal') and text()='" + letter.Subject + "']"));
 			draftSubjectBE.WaitForIsVisible();
 
-			var letterInDraft = FindLetterInList(lettersBy, letterEmail, letterSubject, letterBody);
+			var letterInDraft = FindLetterInList(lettersBy, letter);
 			return letterInDraft != null;
 		}
 
-		public bool SendDraftEmail(string letterEmail, string letterSubject, string letterBody)
+		public bool SendDraftEmail(Letter letter)
 		{
-			return SendDraftEmailInternal(letterEmail, letterSubject, letterBody);
+			return SendDraftEmailInternal(letter);
 		}
 
 		public bool DelteFirstDraftEmail()
@@ -106,7 +107,13 @@ namespace WebDriverNUnit.Pages
 			trashItemsBE.WaitForIsVisible();
 
 			//find letter in trash folder
-			var letterInDraft = FindLetterInList(lettersBy, email, subject, data);
+			var letter = new Letter()
+			{
+				Email = email,
+				Subject = subject,
+				Body = data
+			};
+			var letterInDraft = FindLetterInList(lettersBy, letter);
 			return letterInDraft != null;
 		}
 
@@ -116,14 +123,14 @@ namespace WebDriverNUnit.Pages
 			exitBE.Click();
 		}
 
-		private void SaveDraftEmailInternal(string letterEmail, string letterSubject, string letterBody)
+		private void SaveDraftEmailInternal(Letter letter)
 		{
 			newEmailBE.Click();
 			newEmailWindowBE.WaitForIsVisible();
 
-			toBE.SendKeys(letterEmail);
-			subjectBE.SendKeys(letterSubject);
-			bodyBE.SendKeys(letterBody);
+			toBE.SendKeys(letter.Email);
+			subjectBE.SendKeys(letter.Subject);
+			bodyBE.SendKeys(letter.Body);
 
 			//	Save the mail as a draft.
 			saveDraftBE.Click();
@@ -132,7 +139,7 @@ namespace WebDriverNUnit.Pages
 			newEmailWindowClose.Click();
 		}
 
-		private bool SendDraftEmailInternal(string letterEmail, string letterSubject, string letterBody)
+		private bool SendDraftEmailInternal(Letter letter)
 		{
 			//	Verify, that the mail presents in ‘Drafts’ folder
 			//	Verify the draft content (addressee, subject and body – should be the same as in 3).
@@ -140,7 +147,7 @@ namespace WebDriverNUnit.Pages
 			draftBE.UrlContainsFraction("drafts");
 			draftsItemsBE.WaitForIsVisible();
 
-			var letterInDraft = FindLetterInList(lettersBy, letterEmail, letterSubject, letterBody);
+			var letterInDraft = FindLetterInList(lettersBy, letter);
 			if (letterInDraft != null)
 			{
 				letterInDraft.Click();
@@ -150,14 +157,14 @@ namespace WebDriverNUnit.Pages
 				composeAppPopupSendBE.Click();
 				sentMessageCloseBE.Click();
 
-				var checkLetterInDraftResult = CheckLetterInDraft(letterEmail, letterSubject, letterBody);
-				var checkLetterInSentResult = CheckLetterInSent(letterEmail, letterSubject, letterBody);
+				var checkLetterInDraftResult = CheckLetterInDraft(letter);
+				var checkLetterInSentResult = CheckLetterInSent(letter);
 				return checkLetterInDraftResult == null && checkLetterInSentResult != null;
 			}
 			return false;
 		}
 
-		private IWebElement? CheckLetterInDraft(string letterEmail, string letterSubject, string letterBody)
+		private IWebElement? CheckLetterInDraft(Letter letter)
 		{
 			//	Verify, that the mail disappeared from ‘Drafts’ folder
 			sideBarContentBE.Click();
@@ -165,11 +172,11 @@ namespace WebDriverNUnit.Pages
 
 			draftBE.UrlContainsFraction("drafts");
 			draftsItemsBE.WaitForIsVisible();
-			var notExistLetterInDraft = FindLetterInList(lettersBy, letterEmail, letterSubject, letterBody);
+			var notExistLetterInDraft = FindLetterInList(lettersBy, letter);
 			return notExistLetterInDraft;
 		}
 
-		private IWebElement? CheckLetterInSent(string letterEmail, string letterSubject, string letterBody)
+		private IWebElement? CheckLetterInSent(Letter letter)
 		{
 			//	Verify, that the mail is in ‘Sent’ folder.
 			sideBarContentBE.Click();
@@ -177,25 +184,25 @@ namespace WebDriverNUnit.Pages
 
 			draftBE.UrlContainsFraction("sent");
 			sentItemsBE.WaitForIsVisible();
-			var letterInSent = FindLetterInList(lettersBy, letterEmail, letterSubject, letterBody);
+			var letterInSent = FindLetterInList(lettersBy, letter);
 			return letterInSent;
 		}
 
-		private IWebElement FindLetterInList(By letters, string letterEmail, string letterSubject, string letterBody)
+		private IWebElement FindLetterInList(By letters, Letter letter)
 		{
 			var lettersList = Browser.GetDriver().FindElements(letters);
 
-			foreach (var letter in lettersList)
+			foreach (var letterListItem in lettersList)
 			{
-				var email = letter.FindElement(letterCorrespondentBy).GetAttribute("title");
-				var subject = letter.FindElement(letterSubjectBy).Text;
-				var data = letter.FindElement(letterSnippetBy).Text;
+				var email = letterListItem.FindElement(letterCorrespondentBy).GetAttribute("title");
+				var subject = letterListItem.FindElement(letterSubjectBy).Text;
+				var data = letterListItem.FindElement(letterSnippetBy).Text;
 
-				if (email.Contains(letterEmail, StringComparison.OrdinalIgnoreCase) &&
-					subject.Contains(letterSubject, StringComparison.OrdinalIgnoreCase) &&
-					data.Contains(letterBody, StringComparison.OrdinalIgnoreCase))
+				if (email.Contains(letter.Email, StringComparison.OrdinalIgnoreCase) &&
+					subject.Contains(letter.Subject, StringComparison.OrdinalIgnoreCase) &&
+					data.Contains(letter.Body, StringComparison.OrdinalIgnoreCase))
 				{
-					return letter;
+					return letterListItem;
 				}
 			}
 			return null;

@@ -12,5 +12,7 @@ namespace WebDriverNUnit.WebDriver
 		public static string TimeoutForElement = GetEnvironmentVal("TimeoutForElement", "30");
 		public static string Browser = GetEnvironmentVal("Browser", "chrome");
 		public static string StartUrl = GetEnvironmentVal("StartUrl", "https://www.mail.ru/");
+		public static string UserData = GetEnvironmentVal("UserData", @".\Resources\UserData.xml");
+		public static string LetterData = GetEnvironmentVal("LetterData", @".\Resources\LetterData.xml");
 	}
 }
